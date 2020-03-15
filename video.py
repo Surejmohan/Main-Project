@@ -2,26 +2,26 @@ import dlib, cv2
 import numpy as np
 
 
-detector = dlib.get_frontal_face_detector()
+#detector = dlib.get_frontal_face_detector()
 sp = dlib.shape_predictor('models/shape_predictor_68_face_landmarks.dat')
 facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_model_v1.dat')
-
+dnnFaceDetector = dlib.cnn_face_detection_model_v1("models/mmod_human_face_detector.dat")
 
 
 
 def find_faces(img):
-    dets = detector(img, 1)
+    dets = dnnFaceDetector(img, 1)
 
     if len(dets) == 0:
         return np.empty(0), np.empty(0), np.empty(0)
     
     rects, shapes = [], []
     shapes_np = np.zeros((len(dets), 68, 2), dtype=np.int)
-    for k, d in enumerate(dets):
-        rect = ((d.left(), d.top()), (d.right(), d.bottom()))
-        rects.append(rect)
+    for d in dets:
+        rect1 = ((d.rect.left(), d.rect.top()), (d.rect.right(), d.rect.bottom()))
+        rects.append(rect1)
 
-        shape = sp(img, d)
+        shape = sp(img, d.rect)
         
         # convert dlib shape to numpy array
         for i in range(0, 68):
@@ -38,7 +38,7 @@ def find_faces(img):
 def encode_faces(img, shapes):
     face_descriptors = []
     for shape in shapes:
-        face_descriptor = facerec.compute_face_descriptor(img, shape,100)
+        face_descriptor = facerec.compute_face_descriptor(img, shape)
         face_descriptors.append(np.array(face_descriptor))
 
     return np.array(face_descriptors)
@@ -54,7 +54,9 @@ def define():
       'surya':'img/surya.jpg',
       'lakshmi':'img/lakshmi.jpeg',
       'mohanlal':'img/mohanlal.jpg',
-      'obama' : 'img/bobama.jpg'
+      'obama' : 'img/bobama.jpg',
+      'Mohanlal' : 'img/john.jpeg',
+      'MohanLal':'img/john2.jpg'
   }
 
   descs = {
@@ -63,6 +65,8 @@ def define():
       'surya': None,
       'lakshmi': None,
       'mohanlal': None,
+      'Mohanlal': None,
+      'MohanLal': None,
       'obama': None
   }
 
@@ -98,7 +102,7 @@ def encode_face(img):
 
     return np.array(face_descriptor)
 
-video_path = 'img/video2.mp4'
+video_path = 'img/video.mp4'
 cap = cv2.VideoCapture(video_path)
 
 if not cap.isOpened():
