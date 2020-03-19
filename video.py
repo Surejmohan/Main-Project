@@ -2,26 +2,26 @@ import dlib, cv2
 import numpy as np
 
 
-#detector = dlib.get_frontal_face_detector()
+detector = dlib.get_frontal_face_detector()
 sp = dlib.shape_predictor('models/shape_predictor_68_face_landmarks.dat')
 facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_model_v1.dat')
-dnnFaceDetector = dlib.cnn_face_detection_model_v1("models/mmod_human_face_detector.dat")
+#dnnFaceDetector = dlib.cnn_face_detection_model_v1("models/mmod_human_face_detector.dat")
 
 
 
 def find_faces(img):
-    dets = dnnFaceDetector(img, 1)
+    dets = detector(img, 1)
 
     if len(dets) == 0:
         return np.empty(0), np.empty(0), np.empty(0)
     
     rects, shapes = [], []
     shapes_np = np.zeros((len(dets), 68, 2), dtype=np.int)
-    for d in dets:
-        rect1 = ((d.rect.left(), d.rect.top()), (d.rect.right(), d.rect.bottom()))
-        rects.append(rect1)
+     for k, d in enumerate(dets):
+        rect = ((d.left(), d.top()), (d.right(), d.bottom()))
+        rects.append(rect)
 
-        shape = sp(img, d.rect)
+        shape = sp(img, d)
         
         # convert dlib shape to numpy array
         for i in range(0, 68):
